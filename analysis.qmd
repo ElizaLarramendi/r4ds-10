@@ -12,3 +12,24 @@ library(rvest)
 library(httr2)
 library(purrr)
 ```
+
+```{r}
+imdb_snapshots <- readRDS("data/imdb_snapshots.rds") |> as_tibble()
+
+imdb_snapshots
+
+imdb_snapshots |>
+  count(snap_year)
+```
+
+```{r}
+rank_changes <- imdb_snapshots |>
+  filter(snap_year %in% c(2015, 2022)) |>
+  select(snap_year, title, rank) |>
+  pivot_wider(names_from = snap_year, values_from = rank, names_prefix = "rank_") |>
+  drop_na(rank_2015, rank_2022) |>
+  mutate(rank_change = rank_2022 - rank_2015)
+
+rank_changes |>
+  slice_max(abs(rank_change), n = 10)
+```
